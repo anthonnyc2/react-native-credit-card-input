@@ -7,16 +7,26 @@ import {
   Text,
   StyleSheet,
   Platform,
+  Dimensions
 } from "react-native";
 
 import defaultIcons from "./Icons";
 import FlipCard from "react-native-flip-card";
 
-const BASE_SIZE = { width: 300, height: 190 };
+const widthCard = Dimensions.get('window').width <= 414 ? Dimensions.get('window').width * 0.82 : 400;
+
+const BASE_SIZE = { width: widthCard, height: 190 };
 
 const s = StyleSheet.create({
-  cardContainer: {},
+  cardContainer: {
+    alignItems: "center"
+  },
   cardFace: {},
+  bottomContainer: {
+    position: "absolute",
+    bottom: 40,
+    width: "100%",
+  },
   icon: {
     position: "absolute",
     top: 15,
@@ -37,29 +47,33 @@ const s = StyleSheet.create({
     color: "rgba(255, 255, 255, 1)",
   },
   number: {
-    fontSize: 21,
     position: "absolute",
     top: 95,
-    left: 28,
+    width: "100%",
+  },
+  numberText: {
+    fontSize: 21,
+    textAlign: 'center'
   },
   name: {
-    fontSize: 16,
+    fontSize: 15,
     position: "absolute",
-    bottom: 20,
-    left: 25,
+    left: 20,
     right: 100,
   },
   expiryLabel: {
     fontSize: 9,
     position: "absolute",
-    bottom: 40,
-    left: 218,
+    bottom: 0,
+    right: 0,
+    marginRight: 15
   },
   expiry: {
     fontSize: 16,
     position: "absolute",
-    bottom: 20,
-    left: 220,
+    bottom: -20,
+    right: 0,
+    marginRight: 18
   },
   amexCVC: {
     fontSize: 16,
@@ -102,7 +116,6 @@ export default class CardView extends Component {
       expiry: "••/••",
       cvc: "•••",
     },
-
     scale: 1,
     fontFamily: Platform.select({ ios: "Courier", android: "monospace" }),
     imageFront: require("../images/card-front.png"),
@@ -119,10 +132,12 @@ export default class CardView extends Component {
     const shouldFlip = !isAmex && focused === "cvc";
 
     const containerSize = { ...BASE_SIZE, height: BASE_SIZE.height * scale };
-    const transform = { transform: [
-      { scale },
-      { translateY: ((BASE_SIZE.height * (scale - 1) / 2)) },
-    ] };
+    const transform = {
+      transform: [
+        { scale },
+        { translateY: ((BASE_SIZE.height * (scale - 1) / 2)) },
+      ]
+    };
 
     return (
       <View style={[s.cardContainer, containerSize]}>
@@ -135,31 +150,36 @@ export default class CardView extends Component {
           flip={shouldFlip}>
           <ImageBackground style={[BASE_SIZE, s.cardFace, transform]}
             source={imageFront}>
-              <Image style={[s.icon]}
-                source={Icons[brand]} />
-              <Text style={[s.baseText, { fontFamily }, s.number, !number && s.placeholder, focused === "number" && s.focused]}>
-                { !number ? placeholder.number : number }
+            <Image style={[s.icon]}
+              source={Icons[brand]} />
+            <View style={s.number}>
+              <Text style={[s.baseText, { fontFamily }, s.numberText, !number && s.placeholder, focused === "number" && s.focused]}>
+                {!number ? placeholder.number : number}
               </Text>
+            </View>
+            <View style={s.bottomContainer}>
               <Text style={[s.baseText, { fontFamily }, s.name, !name && s.placeholder, focused === "name" && s.focused]}
                 numberOfLines={1}>
-                { !name ? placeholder.name : name.toUpperCase() }
+                {!name ? placeholder.name : name.toUpperCase()}
               </Text>
               <Text style={[s.baseText, { fontFamily }, s.expiryLabel, s.placeholder, focused === "expiry" && s.focused]}>
                 MONTH/YEAR
               </Text>
               <Text style={[s.baseText, { fontFamily }, s.expiry, !expiry && s.placeholder, focused === "expiry" && s.focused]}>
-                { !expiry ? placeholder.expiry : expiry }
+                {!expiry ? placeholder.expiry : expiry}
               </Text>
-              { isAmex &&
-                  <Text style={[s.baseText, { fontFamily }, s.amexCVC, !cvc && s.placeholder, focused === "cvc" && s.focused]}>
-                    { !cvc ? placeholder.cvc : cvc }
-                  </Text> }
+            </View>
+
+            {isAmex &&
+              <Text style={[s.baseText, { fontFamily }, s.amexCVC, !cvc && s.placeholder, focused === "cvc" && s.focused]}>
+                {!cvc ? placeholder.cvc : cvc}
+              </Text>}
           </ImageBackground>
           <ImageBackground style={[BASE_SIZE, s.cardFace, transform]}
             source={imageBack}>
-              <Text style={[s.baseText, s.cvc, !cvc && s.placeholder, focused === "cvc" && s.focused]}>
-                { !cvc ? placeholder.cvc : cvc }
-              </Text>
+            <Text style={[s.baseText, s.cvc, !cvc && s.placeholder, focused === "cvc" && s.focused]}>
+              {!cvc ? placeholder.cvc : cvc}
+            </Text>
           </ImageBackground>
         </FlipCard>
       </View>
